@@ -6,6 +6,7 @@ const checkAuth = require('../middleware/check-auth');
 const fileUpload = require('../middleware/file-upload');
 
 router.get('/', tabsController.getTabs);
+router.get('/last', tabsController.getLastTabs);
 router.get('/:tid', tabsController.getTabsById);
 router.use(checkAuth);
 router.post(

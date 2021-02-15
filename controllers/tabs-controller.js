@@ -66,6 +66,22 @@ const getTabs = async (req, res, next) => {
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
   }); //{creactor: place} => { place: place}
 };
+const getLastTabs = async (req, res, next) => {
+  let tabs;
+  try {
+    tabs = await Tabs.find({}).limit(4);
+  } catch (e) {
+    console.log(e);
+  }
+  if (!tabs || tabs.length === 0) {
+    return next(
+      new HttpError('Could not find tabs for the provided user id.', 404)
+    );
+  }
+  res.json({
+    tabs: tabs.map((tab) => tab.toObject({ getters: true })),
+  }); //{creactor: place} => { place: place}
+};
 
 const getProjectsByUserId = async (req, res, next) => {
   const userId = req.params.uid; //{pid: p1}
@@ -245,6 +261,7 @@ const deleteProject = async (req, res, next) => {
 
 exports.getTabsById = getTabsById;
 exports.getTabs = getTabs;
+exports.getLastTabs = getLastTabs;
 exports.getProjectsByUserId = getProjectsByUserId;
 exports.createTabs = createTabs;
 exports.updateProject = updateProject;

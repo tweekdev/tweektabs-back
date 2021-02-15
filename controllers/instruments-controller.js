@@ -47,6 +47,26 @@ const getInstrument = async (req, res, next) => {
     ),
   }); //{creactor: place} => { place: place}
 };
+const getLastInstrument = async (req, res, next) => {
+  let instruments;
+  try {
+    instruments = await Instrument.find({}).limit(4);
+  } catch (e) {
+    const error = new HttpError(
+      'Fetching instruments failed, please try again.',
+      500
+    );
+    return next(error);
+  }
+  if (!instruments || instruments.length === 0) {
+    return next(new HttpError('Could not find instruments.', 404));
+  }
+  res.json({
+    instruments: instruments.map((instrument) =>
+      instrument.toObject({ getters: true })
+    ),
+  }); //{creactor: place} => { place: place}
+};
 
 const getInstrumentByTabsId = async (req, res, next) => {
   const tabsId = req.params.tid; //{pid: p1}
@@ -198,6 +218,7 @@ const deleteRole = async (req, res, next) => {
 
 exports.getInstrumentById = getInstrumentById;
 exports.getInstrumentByTabsId = getInstrumentByTabsId;
+exports.getLastInstrument = getLastInstrument;
 exports.getInstrument = getInstrument;
 exports.createInstrument = createInstrument;
 exports.updateRole = updateRole;

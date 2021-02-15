@@ -68,6 +68,24 @@ const getTutorials = async (req, res, next) => {
     ),
   }); //{creactor: place} => { place: place}
 };
+const getLastTutorials = async (req, res, next) => {
+  let tutorials;
+  try {
+    tutorials = await Tutorials.find({}).limit(4);
+  } catch (e) {
+    console.log(e);
+  }
+  if (!tutorials || tutorials.length === 0) {
+    return next(
+      new HttpError('Could not find tutorials for the provided user id.', 404)
+    );
+  }
+  res.json({
+    tutorials: tutorials.map((tutorial) =>
+      tutorial.toObject({ getters: true })
+    ),
+  }); //{creactor: place} => { place: place}
+};
 
 const getProjectsByUserId = async (req, res, next) => {
   const userId = req.params.uid; //{pid: p1}
@@ -247,6 +265,7 @@ const deleteProject = async (req, res, next) => {
 
 exports.getTutorialById = getTutorialById;
 exports.getTutorials = getTutorials;
+exports.getLastTutorials = getLastTutorials;
 exports.getProjectsByUserId = getProjectsByUserId;
 exports.createTutorials = createTutorials;
 exports.updateProject = updateProject;

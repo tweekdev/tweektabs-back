@@ -5,6 +5,7 @@ const router = express.Router();
 const checkAuth = require('../middleware/check-auth');
 
 router.get('/', tutorialsController.getTutorials);
+router.get('/last', tutorialsController.getLastTutorials);
 router.get('/:tuid', tutorialsController.getTutorialById);
 router.use(checkAuth);
 router.post(
