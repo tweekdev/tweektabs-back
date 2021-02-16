@@ -23,11 +23,7 @@ const getTabsById = async (req, res, next) => {
         select: 'name',
       });
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not find a tabs.',
-      500
-    );
-    return next(error);
+    console.log(e);
   }
   if (!tabs) {
     const error = new HttpError(
@@ -56,6 +52,38 @@ const getTabs = async (req, res, next) => {
       });
   } catch (e) {
     console.log(e);
+  }
+  if (!tabs || tabs.length === 0) {
+    return next(
+      new HttpError('Could not find tabs for the provided user id.', 404)
+    );
+  }
+  res.json({
+    tabs: tabs.map((tab) => tab.toObject({ getters: true })),
+  }); //{creactor: place} => { place: place}
+};
+
+const getTabsbyInstrumentId = async (req, res, next) => {
+  const instrumentId = req.params.iid; //{pid: p1}
+
+  let tabs;
+  try {
+    tabs = await Tabs.find({ instrument: instrumentId })
+      .populate({
+        path: 'type',
+        select: 'name',
+      })
+      .populate({
+        path: 'difficulty',
+        select: 'name',
+      })
+      .populate({
+        path: 'instrument',
+        select: 'name',
+      });
+  } catch (e) {
+    const error = new HttpError('Fetching tabs failed, please try again.', 500);
+    return next(error);
   }
   if (!tabs || tabs.length === 0) {
     return next(
@@ -158,7 +186,7 @@ const createTabs = async (req, res, next) => {
   res.status(201).json({ tabs: createdTabs });
 };
 
-const updateProject = async (req, res, next) => {
+const updateTabs = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new HttpError(
@@ -167,46 +195,39 @@ const updateProject = async (req, res, next) => {
     );
     return next(error);
   }
-  const { title, description, technos, lien, repository } = req.body;
-  const projectId = req.params.pid; //{pid: p1}
+  const { name, chanteur, type, difficulty, instrument, link } = req.body;
+  const tabsId = req.params.tid; //{pid: p1}
 
-  let project;
+  let tabs;
   try {
-    project = await Project.findById(projectId);
+    tabs = await Tabs.findById(tabsId);
   } catch (e) {
     const error = new HttpError(
-      'Something went wrong, could not update project.',
+      'Something went wrong, could not update tabs.',
       500
     );
     return next(error);
   }
 
-  if (project.creator.toString() !== req.userData.userId) {
-    const error = new HttpError(
-      'You are not allowed to edit this project.',
-      401
-    );
-    return next(error);
-  }
-  project.title = title;
-  project.description = description;
-  project.technos = technos;
-  project.lien = lien;
-  project.repository = repository;
+  tabs.name = name;
+  tabs.chanteur = chanteur;
+  tabs.type = type;
+  tabs.difficulty = difficulty;
+  tabs.instrument = instrument;
+  tabs.link = link;
+  tabs.file = req.file.path ? req.file.path : tabs.file;
 
   try {
-    await project.save();
+    await tabs.save();
   } catch (e) {
     const error = new HttpError(
-      'Something went wrong, could not update project.',
+      'Something went wrong, could not update tabs.',
       500
     );
     return next(error);
   }
 
-  res
-    .status(200)
-    .json({ project: (await project).toObject({ getters: true }) });
+  res.status(200).json({ tabs: (await tabs).toObject({ getters: true }) });
 };
 
 const deleteProject = async (req, res, next) => {
@@ -263,6 +284,7 @@ exports.getTabsById = getTabsById;
 exports.getTabs = getTabs;
 exports.getLastTabs = getLastTabs;
 exports.getProjectsByUserId = getProjectsByUserId;
+exports.getTabsbyInstrumentId = getTabsbyInstrumentId;
 exports.createTabs = createTabs;
-exports.updateProject = updateProject;
+exports.updateTabs = updateTabs;
 exports.deleteProject = deleteProject;

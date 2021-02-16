@@ -6,6 +6,7 @@ const checkAuth = require('../middleware/check-auth');
 
 router.get('/', instrumentsController.getInstrument);
 router.get('/last', instrumentsController.getLastInstrument);
+router.get('/alltutos/:iid', instrumentsController.getTutosbyInstrumentId);
 router.get('/:tid', instrumentsController.getInstrumentById);
 router.use(checkAuth);
 

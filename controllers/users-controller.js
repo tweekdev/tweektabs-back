@@ -227,7 +227,7 @@ const updateUser = async (req, res, next) => {
     user = await User.findById(userId);
   } catch (e) {
     const error = new HttpError(
-      'Something went wrong, could not update project.',
+      'Something went wrong, could not update user.',
       500
     );
     return next(error);

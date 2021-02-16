@@ -1,6 +1,7 @@
 const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 const Instrument = require('../models/instrument');
+const Tabs = require('../models/tabs');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 const fs = require('fs');
@@ -90,6 +91,34 @@ const getInstrumentByTabsId = async (req, res, next) => {
     instruments: instruments.map((instrument) =>
       instrument.toObject({ getters: true })
     ),
+  }); //{creactor: place} => { place: place}
+};
+
+const getTutosbyInstrumentId = async (req, res, next) => {
+  const instrumentId = req.params.iid; //{pid: p1}
+
+  let instruments;
+  try {
+    instruments = await Instrument.aggregate([
+      {
+        $match: {
+          _id: instrumentId,
+        },
+      },
+      {
+        $lookup: {
+          from: 'tutorials',
+          localField: '_id',
+          foreignField: 'instrument',
+          as: 'tutorials',
+        },
+      },
+    ]);
+  } catch (e) {
+    console.log(e);
+  }
+  res.json({
+    instruments: instruments.map((instrument) => instrument),
   }); //{creactor: place} => { place: place}
 };
 
@@ -218,6 +247,7 @@ const deleteRole = async (req, res, next) => {
 
 exports.getInstrumentById = getInstrumentById;
 exports.getInstrumentByTabsId = getInstrumentByTabsId;
+exports.getTutosbyInstrumentId = getTutosbyInstrumentId;
 exports.getLastInstrument = getLastInstrument;
 exports.getInstrument = getInstrument;
 exports.createInstrument = createInstrument;

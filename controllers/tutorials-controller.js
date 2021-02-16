@@ -68,6 +68,44 @@ const getTutorials = async (req, res, next) => {
     ),
   }); //{creactor: place} => { place: place}
 };
+
+const getTutosbyInstrumentId = async (req, res, next) => {
+  const instrumentId = req.params.iid; //{pid: p1}
+
+  let tutorials;
+  try {
+    tutorials = await tutorials
+      .find({ instrument: instrumentId })
+      .populate({
+        path: 'type',
+        select: 'name',
+      })
+      .populate({
+        path: 'difficulty',
+        select: 'name',
+      })
+      .populate({
+        path: 'instrument',
+        select: 'name',
+      });
+  } catch (e) {
+    const error = new HttpError(
+      'Fetching tutorials failed, please try again.',
+      500
+    );
+    return next(error);
+  }
+  if (!tutorials || tutorials.length === 0) {
+    return next(
+      new HttpError('Could not find tutorials for the provided user id.', 404)
+    );
+  }
+  res.json({
+    tutorials: tutorials.map((tutorials) =>
+      tutorials.toObject({ getters: true })
+    ),
+  }); //{creactor: place} => { place: place}
+};
 const getLastTutorials = async (req, res, next) => {
   let tutorials;
   try {
@@ -266,6 +304,7 @@ const deleteProject = async (req, res, next) => {
 exports.getTutorialById = getTutorialById;
 exports.getTutorials = getTutorials;
 exports.getLastTutorials = getLastTutorials;
+exports.getTutosbyInstrumentId = getTutosbyInstrumentId;
 exports.getProjectsByUserId = getProjectsByUserId;
 exports.createTutorials = createTutorials;
 exports.updateProject = updateProject;
