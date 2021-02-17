@@ -15,6 +15,7 @@ const app = express();
 
 const roleRoute = require('./routes/roles-routes');
 const tabsRoute = require('./routes/tabs-routes');
+const tabsTutosRoute = require('./routes/tutos-tabs-routes');
 const tutorialsRoute = require('./routes/tutorials-routes');
 require('dotenv').config();
 
@@ -36,6 +37,7 @@ app.use('/api/tweektabs/types', typeRoute);
 app.use('/api/tweektabs/roles', roleRoute);
 app.use('/api/tweektabs/tabs', tabsRoute);
 app.use('/api/tweektabs/tutorials', tutorialsRoute);
+app.use('/api/tweektabs/tabsTutos', tabsTutosRoute);
 app.use((req, res, next) => {
   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
@@ -63,7 +65,7 @@ mongoose
     { useCreateIndex: true, useUnifiedTopology: true, useNewUrlParser: true }
   )
   .then(() => {
-    app.listen(5000);
+    app.listen(7000);
   })
   .catch((error) => {
     console.log(error);
