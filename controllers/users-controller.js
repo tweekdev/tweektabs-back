@@ -4,6 +4,8 @@ const Role = require('../models/role');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const publicIp = require('public-ip');
 
 const getUsers = async (req, res, next) => {
   let users;
@@ -124,12 +126,36 @@ const signup = async (req, res, next) => {
     tutorials: tutorials ? tutorials : [],
     news: [],
   });
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: process.env.EMAIL_PORT,
+    secure: true,
+    requireTLS: true,
+    auth: {
+      user: `${process.env.EMAIL_ADDRESS}`,
+      pass: `${process.env.EMAIL_PASSWORD}`,
+    },
+  });
+  var mailOptions = {
+    from: 'tweekTabs',
+    to: createdUser.email,
+    subject: 'Bienvenue sur TweekTabs !',
+    html: `<h1>Bienvenue ${createdUser.pseudo}</h1><p>Tu peux aller parcourir et trouver les tabs qui te plaisent ! ;)</p>`,
+  };
 
   try {
     await createdUser.save();
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
   } catch (e) {
-    const error = new HttpError('Creating user failed, please try again.', 401);
-    return next(error);
+    console.log(e);
   }
 
   //jwt token
@@ -155,7 +181,23 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
+  var dateConnexion = new Date();
+  let date = ('0' + dateConnexion.getDate()).slice(-2);
 
+  // current month
+  let month = ('0' + (dateConnexion.getMonth() + 1)).slice(-2);
+
+  // current year
+  let year = dateConnexion.getFullYear();
+
+  // current hours
+  let hours = dateConnexion.getHours();
+
+  // current minutes
+  let minutes = dateConnexion.getMinutes();
+
+  // current seconds
+  let seconds = dateConnexion.getSeconds();
   let existingUser;
 
   try {
@@ -186,7 +228,39 @@ const login = async (req, res, next) => {
     );
     return next(error);
   }
+  const ip = await publicIp.v4();
+  //=> '46.5.21.123'
 
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: process.env.EMAIL_PORT,
+    secure: true,
+    requireTLS: true,
+    auth: {
+      user: `${process.env.EMAIL_ADDRESS}`,
+      pass: `${process.env.EMAIL_PASSWORD}`,
+    },
+  });
+  var mailOptions = {
+    from: 'tweekTabs',
+    to: existingUser.email,
+    subject: 'TweekTabs connexion !',
+    html: `<h1>Bonjour ${existingUser.pseudo} !</h1>
+		<p>Nous avons détecté une tentative de connexion le ${
+      date +
+      '-' +
+      month +
+      '-' +
+      year +
+      ' à ' +
+      hours +
+      ':' +
+      minutes +
+      ':' +
+      seconds
+    } avec l'adresse IP : ${ip} </p>`,
+  };
   //jwt token
   let token;
   try {
@@ -195,6 +269,13 @@ const login = async (req, res, next) => {
       process.env.JWT_KEY,
       { expiresIn: '1h' }
     );
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
   } catch (e) {
     const error = new HttpError('Logging in failed, please try again.', 401);
     return next(error);
