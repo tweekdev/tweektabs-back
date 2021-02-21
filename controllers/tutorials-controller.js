@@ -21,6 +21,10 @@ const getTutorialById = async (req, res, next) => {
       .populate({
         path: 'instrument',
         select: 'name',
+      })
+      .populate({
+        path: 'creator',
+        select: 'pseudo picture',
       });
   } catch (e) {
     const error = new HttpError(
@@ -155,13 +159,23 @@ const createTutorials = async (req, res, next) => {
       new HttpError('Invalid input passed, please check your data.', 422)
     );
   }
-  const { name, chanteur, type, difficulty, instrument, link, tab } = req.body;
+  const {
+    name,
+    chanteur,
+    type,
+    difficulty,
+    instrument,
+    link,
+    tab,
+    description,
+  } = req.body;
   // const title = req.body.title
   const createdTutorials = new Tutorials({
     name,
     chanteur,
     type,
     difficulty,
+    description,
     instrument,
     link,
     tab,
@@ -199,48 +213,48 @@ const createTutorials = async (req, res, next) => {
 
   res.status(201).json({ tutorials: createdTutorials });
 };
-
-const updateProject = async (req, res, next) => {
+const updateTutorial = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error = new HttpError(
-      'Invalid input passed, please check your data.',
-      422
-    );
-    return next(error);
+    console.log(errors);
   }
-  const { title, description, technos, lien, repository } = req.body;
-  const projectId = req.params.pid; //{pid: p1}
+  const {
+    name,
+    chanteur,
+    type,
+    difficulty,
+    tab,
+    instrument,
+    link,
+    description,
+  } = req.body;
+  const tutoId = req.params.tid; //{pid: p1}
 
-  let project;
+  let tutorials;
   try {
-    project = await Project.findById(projectId);
+    tutorials = await Tutorials.findById(tutoId);
   } catch (e) {
     const error = new HttpError(
-      'Something went wrong, could not update project.',
+      'Something went wrong, could not update tutorials.',
       500
     );
     return next(error);
   }
 
-  if (project.creator.toString() !== req.userData.userId) {
-    const error = new HttpError(
-      'You are not allowed to edit this project.',
-      401
-    );
-    return next(error);
-  }
-  project.title = title;
-  project.description = description;
-  project.technos = technos;
-  project.lien = lien;
-  project.repository = repository;
+  tutorials.name = name;
+  tutorials.chanteur = chanteur;
+  tutorials.type = type;
+  tutorials.tab = tab;
+  tutorials.difficulty = difficulty;
+  tutorials.instrument = instrument;
+  tutorials.description = description;
+  tutorials.link = link;
 
   try {
-    await project.save();
+    await tutorials.save();
   } catch (e) {
     const error = new HttpError(
-      'Something went wrong, could not update project.',
+      'Something went wrong, could not update tutorials.',
       500
     );
     return next(error);
@@ -248,7 +262,7 @@ const updateProject = async (req, res, next) => {
 
   res
     .status(200)
-    .json({ project: (await project).toObject({ getters: true }) });
+    .json({ tutorials: (await tutorials).toObject({ getters: true }) });
 };
 
 const deleteProject = async (req, res, next) => {
@@ -307,5 +321,5 @@ exports.getLastTutorials = getLastTutorials;
 exports.getTutosbyInstrumentId = getTutosbyInstrumentId;
 exports.getProjectsByUserId = getProjectsByUserId;
 exports.createTutorials = createTutorials;
-exports.updateProject = updateProject;
+exports.updateTutorial = updateTutorial;
 exports.deleteProject = deleteProject;

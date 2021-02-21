@@ -12,6 +12,7 @@ const tabsSchema = new Schema({
     required: true,
     ref: 'Instrument',
   },
+  description: { type: String, required: false },
   difficulty: {
     type: mongoose.Types.ObjectId,
     required: true,

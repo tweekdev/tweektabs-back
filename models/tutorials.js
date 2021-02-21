@@ -17,6 +17,7 @@ const tutorialsSchema = new Schema({
     required: true,
     ref: 'Difficulty',
   },
+  description: { type: String, required: false },
   date: { type: Date, required: true },
   type: { type: mongoose.Types.ObjectId, required: true, ref: 'Type' },
   creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },

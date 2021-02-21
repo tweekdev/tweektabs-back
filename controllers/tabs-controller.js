@@ -21,6 +21,10 @@ const getTabsById = async (req, res, next) => {
       .populate({
         path: 'instrument',
         select: 'name',
+      })
+      .populate({
+        path: 'creator',
+        select: 'pseudo picture',
       });
   } catch (e) {
     console.log(e);
@@ -141,13 +145,22 @@ const createTabs = async (req, res, next) => {
       new HttpError('Invalid input passed, please check your data.', 422)
     );
   }
-  const { name, chanteur, type, difficulty, instrument, link } = req.body;
+  const {
+    name,
+    chanteur,
+    type,
+    difficulty,
+    instrument,
+    link,
+    description,
+  } = req.body;
   // const title = req.body.title
   const createdTabs = new Tabs({
     name,
     chanteur,
     type,
     difficulty,
+    description,
     instrument,
     link,
     file: req.file.path,
@@ -195,7 +208,15 @@ const updateTabs = async (req, res, next) => {
     );
     return next(error);
   }
-  const { name, chanteur, type, difficulty, instrument, link } = req.body;
+  const {
+    name,
+    chanteur,
+    type,
+    difficulty,
+    instrument,
+    link,
+    description,
+  } = req.body;
   const tabsId = req.params.tid; //{pid: p1}
 
   let tabs;
@@ -214,6 +235,7 @@ const updateTabs = async (req, res, next) => {
   tabs.type = type;
   tabs.difficulty = difficulty;
   tabs.instrument = instrument;
+  tabs.description = description;
   tabs.link = link;
   tabs.file = req.file ? req.file.path : tabs.file;
 

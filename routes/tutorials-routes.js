@@ -11,6 +11,11 @@ router.get(
   tutorialsController.getTutosbyInstrumentId
 );
 router.get('/:tuid', tutorialsController.getTutorialById);
+router.patch(
+  '/:tid',
+  [check('name').not().isEmpty()],
+  tutorialsController.updateTutorial
+);
 router.use(checkAuth);
 router.post(
   '/',
