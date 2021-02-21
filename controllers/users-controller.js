@@ -64,22 +64,14 @@ const getUsersById = async (req, res, next) => {
     const error = new HttpError('Fetching tabs failed, please try again.', 500);
     return next(error);
   }
-  if (!users || users.length === 0) {
-    return next(
-      new HttpError('Could not find tabs for the provided user id.', 404)
-    );
-  }
+
   res.json({
     users: users.map((user) => user.toObject({ getters: true })),
   }); //{creactor: place} => { place: place}
 };
 
 const signup = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    console.log(errors);
-  }
-
+  const admin = '601724ea6f33a7db18a485c5';
   const {
     firstname,
     name,
@@ -122,6 +114,7 @@ const signup = async (req, res, next) => {
     email,
     password: hashedPassword,
     role,
+    picture: req.file.path ? req.file.path : null,
     tabs: tabs ? tabs : [],
     tutorials: tutorials ? tutorials : [],
     news: [],
@@ -176,6 +169,8 @@ const signup = async (req, res, next) => {
     email: createdUser.email,
     token: token,
     role: createdUser.role,
+    pseudo: createdUser.pseudo,
+    picture: createdUser.picture,
   });
 };
 
@@ -286,6 +281,8 @@ const login = async (req, res, next) => {
     email: existingUser.email,
     token: token,
     role: existingUser.role,
+    pseudo: existingUser.pseudo,
+    picture: existingUser.picture,
     tabs: existingUser.tabs,
   });
 };
@@ -318,15 +315,11 @@ const updateUser = async (req, res, next) => {
   user.pseudo = pseudo;
   user.role = role;
   user.email = email;
-
+  user.picture = req.file ? req.file.path : user.picture;
   try {
     await user.save();
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update project.',
-      500
-    );
-    return next(error);
+    console.log(e);
   }
 
   res.status(200).json({ user: (await user).toObject({ getters: true }) });

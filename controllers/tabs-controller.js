@@ -215,7 +215,7 @@ const updateTabs = async (req, res, next) => {
   tabs.difficulty = difficulty;
   tabs.instrument = instrument;
   tabs.link = link;
-  tabs.file = req.file.path ? req.file.path : tabs.file;
+  tabs.file = req.file ? req.file.path : tabs.file;
 
   try {
     await tabs.save();

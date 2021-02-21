@@ -20,6 +20,7 @@ const tutorialsRoute = require('./routes/tutorials-routes');
 require('dotenv').config();
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors('*'));
 app.use(
@@ -38,14 +39,14 @@ app.use('/api/tweektabs/roles', roleRoute);
 app.use('/api/tweektabs/tabs', tabsRoute);
 app.use('/api/tweektabs/tutorials', tutorialsRoute);
 app.use('/api/tweektabs/tabsTutos', tabsTutosRoute);
-app.use((req, res, next) => {
-  res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
-});
 /*app.use((req, res, next) => {
   const error = new HttpError('Could not find this route', 404);
   throw error;
 });
 */
+app.use((req, res, next) => {
+  res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
+});
 app.use((error, req, res, next) => {
   if (req.file) {
     fs.unlink(req.file.path, () => {
