@@ -7,8 +7,9 @@ const fileUpload = require('../middleware/file-upload');
 
 router.get('/', tabsController.getTabs);
 router.get('/last', tabsController.getLastTabs);
-router.get('/:tid', tabsController.getTabsById);
+router.get('/user/:uid', tabsController.getTabsByUserId);
 router.get('/allByInstrumentId/:iid', tabsController.getTabsbyInstrumentId);
+router.get('/:tid', tabsController.getTabsById);
 router.patch(
   '/:tid',
   fileUpload.single('file'),
@@ -22,5 +23,6 @@ router.post(
   [check('name').not().isEmpty()],
   tabsController.createTabs
 );
+router.delete('/:tid', tabsController.deleteTab);
 
 module.exports = router;

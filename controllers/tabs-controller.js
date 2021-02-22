@@ -4,6 +4,7 @@ const Tabs = require('../models/tabs');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 const fs = require('fs');
+const ObjectId = mongoose.Types.ObjectId;
 
 const getTabsById = async (req, res, next) => {
   const tabsId = req.params.tid; //{pid: p1}
@@ -37,6 +38,41 @@ const getTabsById = async (req, res, next) => {
     return next(error);
   }
   res.json({ tabs: tabs.toObject({ getters: true }) }); //{id: place} => { place: place}
+};
+const getTabsByUserId = async (req, res, next) => {
+  const userId = req.params.uid; //{pid: p1}
+  let tabs;
+  try {
+    tabs = await Tabs.find({ creator: userId })
+      .populate({
+        path: 'type',
+        select: 'name',
+      })
+      .populate({
+        path: 'difficulty',
+        select: 'name',
+      })
+      .populate({
+        path: 'instrument',
+        select: 'name',
+      })
+      .populate({
+        path: 'creator',
+        select: 'pseudo picture',
+      });
+  } catch (e) {
+    console.log(e);
+  }
+  if (!tabs) {
+    const error = new HttpError(
+      'Could not find tabs for the provided user id.',
+      404
+    );
+    return next(error);
+  }
+  res.json({
+    tabs: tabs.map((tab) => tab.toObject({ getters: true })),
+  });
 };
 const getTabs = async (req, res, next) => {
   let tabs;
@@ -252,61 +288,53 @@ const updateTabs = async (req, res, next) => {
   res.status(200).json({ tabs: (await tabs).toObject({ getters: true }) });
 };
 
-const deleteProject = async (req, res, next) => {
-  const projectId = req.params.pid; //{pid: p1}
-  let project;
+const deleteTab = async (req, res, next) => {
+  const tabtId = req.params.tid; //{pid: p1}
+  let tabs;
   try {
-    project = await Project.findById(projectId).populate('creator');
+    tabs = await Tabs.findById(tabtId).populate('creator');
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not delete project.',
-      500
-    );
+    console.error(e);
+  }
+
+  if (!tabs) {
+    const error = new HttpError('Could not find tabs.', 404);
     return next(error);
   }
 
-  if (!project) {
-    const error = new HttpError('Could not find project.', 404);
-    return next(error);
-  }
-
-  if (project.creator.id !== req.userData.userId) {
+  if (tabs.creator.id !== req.userData.userId) {
     const error = new HttpError(
-      'You are not allowed to delete this project.',
+      'You are not allowed to delete this tabs.',
       401
     );
     return next(error);
   }
 
-  const imagePath = project.image;
+  const imagePath = tabs.file;
 
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    await project.remove({ session: session });
-    project.creator.projects.pull(project);
-    await project.creator.save({ session: session });
+    await tabs.remove({ session: session });
+    tabs.creator.tabs.pull(tabs);
+    await tabs.creator.save({ session: session });
     await session.commitTransaction();
   } catch (err) {
-    const error = new HttpError(
-      'Something went wrong, could not delete project.',
-      500
-    );
-    return next(error);
+    console.log(err);
   }
 
   fs.unlink(imagePath, (err) => {
     console.log(err);
   });
 
-  res.status(200).json({ message: 'Project deleted.' });
+  res.status(200).json({ message: 'tabs deleted.' });
 };
 
 exports.getTabsById = getTabsById;
 exports.getTabs = getTabs;
 exports.getLastTabs = getLastTabs;
-exports.getProjectsByUserId = getProjectsByUserId;
+exports.getTabsByUserId = getTabsByUserId;
 exports.getTabsbyInstrumentId = getTabsbyInstrumentId;
 exports.createTabs = createTabs;
 exports.updateTabs = updateTabs;
-exports.deleteProject = deleteProject;
+exports.deleteTab = deleteTab;
