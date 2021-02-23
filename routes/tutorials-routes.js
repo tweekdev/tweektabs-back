@@ -10,6 +10,7 @@ router.get(
   '/allByInstrumentId/:iid',
   tutorialsController.getTutosbyInstrumentId
 );
+router.get('/user/:uid', tutorialsController.getTutorialsByUserId);
 router.get('/:tuid', tutorialsController.getTutorialById);
 router.patch(
   '/:tid',

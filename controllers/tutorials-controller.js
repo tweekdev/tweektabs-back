@@ -113,7 +113,20 @@ const getTutosbyInstrumentId = async (req, res, next) => {
 const getLastTutorials = async (req, res, next) => {
   let tutorials;
   try {
-    tutorials = await Tutorials.find({}).limit(4);
+    tutorials = await Tutorials.find({})
+      .populate({
+        path: 'type',
+        select: 'name',
+      })
+      .populate({
+        path: 'difficulty',
+        select: 'name',
+      })
+      .populate({
+        path: 'instrument',
+        select: 'name',
+      })
+      .limit(7);
   } catch (e) {
     console.log(e);
   }
@@ -129,6 +142,43 @@ const getLastTutorials = async (req, res, next) => {
   }); //{creactor: place} => { place: place}
 };
 
+const getTutorialsByUserId = async (req, res, next) => {
+  const userId = req.params.uid; //{pid: p1}
+  let tutorials;
+  try {
+    tutorials = await Tutorials.find({ creator: userId })
+      .populate({
+        path: 'type',
+        select: 'name',
+      })
+      .populate({
+        path: 'difficulty',
+        select: 'name',
+      })
+      .populate({
+        path: 'instrument',
+        select: 'name',
+      })
+      .populate({
+        path: 'creator',
+        select: 'pseudo picture',
+      });
+  } catch (e) {
+    console.log(e);
+  }
+  if (!tutorials) {
+    const error = new HttpError(
+      'Could not find tutorials for the provided user id.',
+      404
+    );
+    return next(error);
+  }
+  res.json({
+    tutorials: tutorials.map((tutorial) =>
+      tutorial.toObject({ getters: true })
+    ),
+  });
+};
 const getProjectsByUserId = async (req, res, next) => {
   const userId = req.params.uid; //{pid: p1}
 
@@ -319,7 +369,7 @@ exports.getTutorialById = getTutorialById;
 exports.getTutorials = getTutorials;
 exports.getLastTutorials = getLastTutorials;
 exports.getTutosbyInstrumentId = getTutosbyInstrumentId;
-exports.getProjectsByUserId = getProjectsByUserId;
+exports.getTutorialsByUserId = getTutorialsByUserId;
 exports.createTutorials = createTutorials;
 exports.updateTutorial = updateTutorial;
 exports.deleteProject = deleteProject;

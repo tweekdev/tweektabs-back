@@ -6,8 +6,8 @@ const checkAuth = require('../middleware/check-auth');
 const fileUpload = require('../middleware/file-upload');
 
 router.get('/', tabsController.getTabs);
-router.get('/last', tabsController.getLastTabs);
 router.get('/user/:uid', tabsController.getTabsByUserId);
+router.get('/type/:tid', tabsController.getTabsByTypeId);
 router.get('/allByInstrumentId/:iid', tabsController.getTabsbyInstrumentId);
 router.get('/:tid', tabsController.getTabsById);
 router.patch(

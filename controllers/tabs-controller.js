@@ -134,10 +134,12 @@ const getTabsbyInstrumentId = async (req, res, next) => {
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
   }); //{creactor: place} => { place: place}
 };
-const getLastTabs = async (req, res, next) => {
+const getTabsByTypeId = async (req, res, next) => {
+  const typeId = req.params.tid; //{pid: p1}
+
   let tabs;
   try {
-    tabs = await Tabs.find({}).limit(4);
+    tabs = await Tabs.find({ type: typeId }).limit(5);
   } catch (e) {
     console.log(e);
   }
@@ -148,29 +150,6 @@ const getLastTabs = async (req, res, next) => {
   }
   res.json({
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
-  }); //{creactor: place} => { place: place}
-};
-
-const getProjectsByUserId = async (req, res, next) => {
-  const userId = req.params.uid; //{pid: p1}
-
-  let projects;
-  try {
-    projects = await Project.find({ creator: userId });
-  } catch (e) {
-    const error = new HttpError(
-      'Fetching projects failed, please try again.',
-      500
-    );
-    return next(error);
-  }
-  if (!projects || projects.length === 0) {
-    return next(
-      new HttpError('Could not find projects for the provided user id.', 404)
-    );
-  }
-  res.json({
-    projects: projects.map((project) => project.toObject({ getters: true })),
   }); //{creactor: place} => { place: place}
 };
 
@@ -332,7 +311,7 @@ const deleteTab = async (req, res, next) => {
 
 exports.getTabsById = getTabsById;
 exports.getTabs = getTabs;
-exports.getLastTabs = getLastTabs;
+exports.getTabsByTypeId = getTabsByTypeId;
 exports.getTabsByUserId = getTabsByUserId;
 exports.getTabsbyInstrumentId = getTabsbyInstrumentId;
 exports.createTabs = createTabs;
