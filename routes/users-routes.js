@@ -17,9 +17,10 @@ router.post(
 router.get('/', usersController.getUsers);
 
 router.get('/user/:uid', usersController.getUsersById);
+router.post('/forgotPassword', usersController.forgotPassword);
 router.get('/:tid', usersController.getUsersByTabs);
-
 router.post('/signup', fileUpload.single('picture'), usersController.signup);
+router.patch('/user/resetPassword', usersController.resetPassword);
 router.use(checkAuth);
 router.patch('/user/password/:uid', usersController.updateUserPassword);
 router.patch(

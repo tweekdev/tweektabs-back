@@ -10,6 +10,7 @@ router.get('/user/:uid', tabsController.getTabsByUserId);
 router.get('/type/:tid', tabsController.getTabsByTypeId);
 router.get('/allByInstrumentId/:iid', tabsController.getTabsbyInstrumentId);
 router.get('/:tid', tabsController.getTabsById);
+
 router.patch(
   '/:tid',
   fileUpload.single('file'),

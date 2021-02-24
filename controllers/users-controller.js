@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const publicIp = require('public-ip');
-
+const Email = require('./../utils/email');
 const getUsers = async (req, res, next) => {
   let users;
   try {
@@ -119,39 +119,11 @@ const signup = async (req, res, next) => {
     tutorials: tutorials ? tutorials : [],
     news: [],
   });
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT,
-    secure: true,
-    requireTLS: true,
-    auth: {
-      user: `${process.env.EMAIL_ADDRESS}`,
-      pass: `${process.env.EMAIL_PASSWORD}`,
-    },
-  });
-  var mailOptions = {
-    from: 'tweekTabs',
-    to: createdUser.email,
-    subject: 'Bienvenue sur TweekTabs !',
-    html: `<h1>Bienvenue ${createdUser.pseudo}</h1>
-		<p>Tu peux aller parcourir et trouver les tabs qui te plaisent ! ;)</p>
-				<br/>
-		<p>Bonne journée!</p>
-		<br/>
-		<p>l'équipe TweekTabs</p>`,
-  };
 
   try {
     await createdUser.save();
-
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
-    });
+    const url = `${req.protocol}://${req.get('host')}${req.hostname}/`;
+    await new Email(createdUser, url).sendWelcome();
   } catch (e) {
     console.log(e);
   }
@@ -228,43 +200,7 @@ const login = async (req, res, next) => {
     );
     return next(error);
   }
-  const ip = await publicIp.v4();
-  //=> '46.5.21.123'
 
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT,
-    secure: true,
-    requireTLS: true,
-    auth: {
-      user: `${process.env.EMAIL_ADDRESS}`,
-      pass: `${process.env.EMAIL_PASSWORD}`,
-    },
-  });
-  var mailOptions = {
-    from: 'tweekTabs',
-    to: existingUser.email,
-    subject: 'TweekTabs connexion !',
-    html: `<h1>Bonjour ${existingUser.pseudo} !</h1>
-		<p>Nous avons détecté une tentative de connexion le ${
-      date +
-      '-' +
-      month +
-      '-' +
-      year +
-      ' à ' +
-      hours +
-      ':' +
-      minutes +
-      ':' +
-      seconds
-    } avec l'adresse IP : ${ip} </p>
-		<br/>
-		<p>Bonne journée!</p>
-		<br/>
-		<p>l'équipe TweekTabs</p>`,
-  };
   //jwt token
   let token;
   try {
@@ -273,13 +209,8 @@ const login = async (req, res, next) => {
       process.env.JWT_KEY,
       { expiresIn: '1h' }
     );
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
-    });
+    const url = `${req.protocol}://${req.get('host')}${req.hostname}/`;
+    await new Email(existingUser, url).sendLogin();
   } catch (e) {
     const error = new HttpError('Logging in failed, please try again.', 401);
     return next(error);
@@ -356,6 +287,101 @@ const updateUserPassword = async (req, res, next) => {
     );
     return next(error);
   }
+
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (e) {
+    const error = new HttpError(
+      'Could not update user password, please try again.',
+      500
+    );
+    return next(error);
+  }
+  user.password = hashedPassword;
+  try {
+    await user.save();
+    const url = `${req.protocol}://${req.get('host')}${req.hostname}/`;
+    await new Email(user, url).sendUpdatePassword();
+  } catch (e) {
+    console.log(e);
+  }
+
+  res.status(200).json({ user: (await user).toObject({ getters: true }) });
+};
+
+const forgotPassword = async (req, res, next) => {
+  // 1) get user based on post email
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: req.body.email });
+  } catch (e) {
+    const error = new HttpError("Cette adresse email n'existe pas.", 401);
+    return next(error);
+  }
+
+  if (!existingUser) {
+    const error = new HttpError("Cette adresse email n'existe pas.", 401);
+    return next(error);
+  }
+
+  // 2) Generate reset token  let token;
+  let token;
+  token = jwt.sign(
+    { userId: existingUser.id, email: existingUser.email },
+    process.env.JWT_KEY,
+    { expiresIn: '1h' }
+  );
+
+  try {
+    const resetURL = `http://localhost:3000/resetPassword/${token}`;
+    await new Email(existingUser, resetURL).sendPasswordReset();
+    res.status(200).json({
+      status: 'success',
+      message: 'Token sent to email!',
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+const resetPassword = async (req, res, next) => {
+  const token = req.headers.authorization.split(' ')[1]; // Authorization: 'Bearer TOKEN'
+  if (!token) {
+    throw new Error('Missing authorization');
+  }
+  let userId;
+  try {
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
+    userId = decodedToken.userId;
+  } catch (e) {
+    const error = new HttpError(
+      'Désolé le token ou les informations sont invalides.',
+      422
+    );
+    return next(error);
+  }
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new HttpError(
+      'Invalid input passed, please check your data.',
+      422
+    );
+    return next(error);
+  }
+
+  const { password } = req.body;
+
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (e) {
+    const error = new HttpError(
+      'Something went wrong, could not update password user.',
+      500
+    );
+    return next(error);
+  }
   var transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
@@ -412,3 +438,5 @@ exports.login = login;
 exports.getUsersByTabs = getUsersByTabs;
 exports.updateUser = updateUser;
 exports.updateUserPassword = updateUserPassword;
+exports.forgotPassword = forgotPassword;
+exports.resetPassword = resetPassword;
