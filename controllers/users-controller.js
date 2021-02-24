@@ -134,7 +134,12 @@ const signup = async (req, res, next) => {
     from: 'tweekTabs',
     to: createdUser.email,
     subject: 'Bienvenue sur TweekTabs !',
-    html: `<h1>Bienvenue ${createdUser.pseudo}</h1><p>Tu peux aller parcourir et trouver les tabs qui te plaisent ! ;)</p>`,
+    html: `<h1>Bienvenue ${createdUser.pseudo}</h1>
+		<p>Tu peux aller parcourir et trouver les tabs qui te plaisent ! ;)</p>
+				<br/>
+		<p>Bonne journée!</p>
+		<br/>
+		<p>l'équipe TweekTabs</p>`,
   };
 
   try {
@@ -254,7 +259,11 @@ const login = async (req, res, next) => {
       minutes +
       ':' +
       seconds
-    } avec l'adresse IP : ${ip} </p>`,
+    } avec l'adresse IP : ${ip} </p>
+		<br/>
+		<p>Bonne journée!</p>
+		<br/>
+		<p>l'équipe TweekTabs</p>`,
   };
   //jwt token
   let token;
@@ -324,6 +333,77 @@ const updateUser = async (req, res, next) => {
 
   res.status(200).json({ user: (await user).toObject({ getters: true }) });
 };
+const updateUserPassword = async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    const error = new HttpError(
+      'Invalid input passed, please check your data.',
+      422
+    );
+    return next(error);
+  }
+
+  const { password } = req.body;
+  const userId = req.params.uid; //{pid: p1}
+
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (e) {
+    const error = new HttpError(
+      'Something went wrong, could not update password user.',
+      500
+    );
+    return next(error);
+  }
+  var transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: process.env.EMAIL_PORT,
+    secure: true,
+    requireTLS: true,
+    auth: {
+      user: `${process.env.EMAIL_ADDRESS}`,
+      pass: `${process.env.EMAIL_PASSWORD}`,
+    },
+  });
+  var mailOptions = {
+    from: 'tweekTabs',
+    to: user.email,
+    subject: 'Mise à jour mot de passe TweekTabs !',
+    html: `<h1>Bonjour ${user.pseudo} </h1>
+		<p>Ton mot de passe a bien été mis à jour! ;)</p>
+		<br/>
+		<p>Bonne journée!</p>
+		<br/>
+		<p>l'équipe TweekTabs</p>`,
+  };
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (e) {
+    const error = new HttpError(
+      'Could not update user password, please try again.',
+      500
+    );
+    return next(error);
+  }
+  user.password = hashedPassword;
+  try {
+    await user.save();
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+  } catch (e) {
+    console.log(e);
+  }
+
+  res.status(200).json({ user: (await user).toObject({ getters: true }) });
+};
 
 exports.getUsers = getUsers;
 exports.getUsersById = getUsersById;
@@ -331,3 +411,4 @@ exports.signup = signup;
 exports.login = login;
 exports.getUsersByTabs = getUsersByTabs;
 exports.updateUser = updateUser;
+exports.updateUserPassword = updateUserPassword;

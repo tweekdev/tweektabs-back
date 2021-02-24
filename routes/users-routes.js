@@ -21,6 +21,7 @@ router.get('/:tid', usersController.getUsersByTabs);
 
 router.post('/signup', fileUpload.single('picture'), usersController.signup);
 router.use(checkAuth);
+router.patch('/user/password/:uid', usersController.updateUserPassword);
 router.patch(
   '/:uid',
   fileUpload.single('picture')
