@@ -10,6 +10,7 @@ router.get('/user/:uid', tabsController.getTabsByUserId);
 router.get('/type/:tid', tabsController.getTabsByTypeId);
 router.get('/allByInstrumentId/:iid', tabsController.getTabsbyInstrumentId);
 router.get('/:tid', tabsController.getTabsById);
+router.use(checkAuth);
 
 router.patch(
   '/:tid',
@@ -17,13 +18,13 @@ router.patch(
   [check('name').not().isEmpty()],
   tabsController.updateTabs
 );
-router.use(checkAuth);
 router.post(
   '/',
   fileUpload.single('file'),
   [check('name').not().isEmpty()],
   tabsController.createTabs
 );
+router.delete('/deletetabadmin/:tid', tabsController.deleteTabAdmin);
 router.delete('/:tid', tabsController.deleteTab);
 
 module.exports = router;

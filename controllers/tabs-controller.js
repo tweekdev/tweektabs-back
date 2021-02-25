@@ -234,6 +234,14 @@ const updateTabs = async (req, res, next) => {
   } = req.body;
   const tabsId = req.params.tid; //{pid: p1}
 
+  let existingUser;
+  try {
+    existingUser = await User.findById(req.userData.userId);
+  } catch (e) {
+    const error = new HttpError('Signing failed, please try again.', 401);
+    return next(error);
+  }
+
   let tabs;
   try {
     tabs = await Tabs.findById(tabsId);
@@ -242,6 +250,13 @@ const updateTabs = async (req, res, next) => {
       'Something went wrong, could not update tabs.',
       500
     );
+    return next(error);
+  }
+
+  if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
+    console.log('adm');
+  } else if (tabs.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('You are not allowed to edit this tabs.', 401);
     return next(error);
   }
 
@@ -281,11 +296,8 @@ const deleteTab = async (req, res, next) => {
     return next(error);
   }
 
-  if (tabs.creator.id !== req.userData.userId) {
-    const error = new HttpError(
-      'You are not allowed to delete this tabs.',
-      401
-    );
+  if (tabs.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('You are not allowed to edit this tabs.', 401);
     return next(error);
   }
 
@@ -308,6 +320,58 @@ const deleteTab = async (req, res, next) => {
 
   res.status(200).json({ message: 'tabs deleted.' });
 };
+const deleteTabAdmin = async (req, res, next) => {
+  const tabtId = req.params.tid; //{pid: p1}
+  let tabs;
+  console.log(tabtId);
+  try {
+    tabs = await Tabs.findById(tabtId).populate('creator');
+  } catch (e) {
+    console.error(e);
+  }
+
+  if (!tabs) {
+    const error = new HttpError('Could not find tabs.', 404);
+    return next(error);
+  }
+  let existingUser;
+  try {
+    existingUser = await User.findById(req.userData.userId);
+  } catch (e) {
+    const error = new HttpError('Signing failed, please try again.', 401);
+    return next(error);
+  }
+  if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
+    console.log('adm');
+  } else {
+    const error = new HttpError('You are not allowed to edit this tabs.', 401);
+    return next(error);
+  }
+
+  const imagePath = tabs.file;
+
+  try {
+    if (tabs.creator !== undefined || tabs.creator !== null) {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      await tabs.remove({ session: session });
+      tabs.creator.tabs.pull(tabs);
+      await tabs.creator.save({ session: session });
+      await session.commitTransaction();
+    } else {
+      await tabs.remove(tabs);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
+  if (imagePath) {
+    fs.unlink(imagePath, (err) => {
+      console.log(err);
+    });
+  }
+  res.status(200).json({ message: 'tabs deleted.' });
+};
 
 exports.getTabsById = getTabsById;
 exports.getTabs = getTabs;
@@ -317,3 +381,4 @@ exports.getTabsbyInstrumentId = getTabsbyInstrumentId;
 exports.createTabs = createTabs;
 exports.updateTabs = updateTabs;
 exports.deleteTab = deleteTab;
+exports.deleteTabAdmin = deleteTabAdmin;

@@ -12,16 +12,18 @@ router.get(
 );
 router.get('/user/:uid', tutorialsController.getTutorialsByUserId);
 router.get('/:tuid', tutorialsController.getTutorialById);
+router.use(checkAuth);
 router.patch(
   '/:tid',
   [check('name').not().isEmpty()],
   tutorialsController.updateTutorial
 );
-router.use(checkAuth);
 router.post(
   '/',
   [check('name').not().isEmpty()],
   tutorialsController.createTutorials
 );
+router.delete('/deletetutoadmin/:tid', tutorialsController.deleteTutoAdmin);
+router.delete('/:tid', tutorialsController.deleteTuto);
 
 module.exports = router;

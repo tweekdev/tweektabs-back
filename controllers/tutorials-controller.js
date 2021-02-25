@@ -279,6 +279,13 @@ const updateTutorial = async (req, res, next) => {
     description,
   } = req.body;
   const tutoId = req.params.tid; //{pid: p1}
+  let existingUser;
+  try {
+    existingUser = await User.findById(req.userData.userId);
+  } catch (e) {
+    const error = new HttpError('Signing failed, please try again.', 401);
+    return next(error);
+  }
 
   let tutorials;
   try {
@@ -288,6 +295,13 @@ const updateTutorial = async (req, res, next) => {
       'Something went wrong, could not update tutorials.',
       500
     );
+    return next(error);
+  }
+
+  if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
+    console.log('adm');
+  } else if (tabs.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('You are not allowed to edit this tabs.', 401);
     return next(error);
   }
 
@@ -315,54 +329,83 @@ const updateTutorial = async (req, res, next) => {
     .json({ tutorials: (await tutorials).toObject({ getters: true }) });
 };
 
-const deleteProject = async (req, res, next) => {
-  const projectId = req.params.pid; //{pid: p1}
-  let project;
+const deleteTuto = async (req, res, next) => {
+  const tutorialId = req.params.tid; //{pid: p1}
+  let tutorials;
   try {
-    project = await Project.findById(projectId).populate('creator');
+    tutorials = await Tutorials.findById(tutorialId).populate('creator');
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not delete project.',
-      500
-    );
+    console.error(e);
+  }
+
+  if (!tutorials) {
+    const error = new HttpError('Could not find tutorials.', 404);
     return next(error);
   }
 
-  if (!project) {
-    const error = new HttpError('Could not find project.', 404);
-    return next(error);
-  }
-
-  if (project.creator.id !== req.userData.userId) {
+  if (tutorials.creator.id !== req.userData.userId) {
     const error = new HttpError(
-      'You are not allowed to delete this project.',
+      'You are not allowed to delete this tutorials.',
       401
     );
     return next(error);
   }
 
-  const imagePath = project.image;
-
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    await project.remove({ session: session });
-    project.creator.projects.pull(project);
-    await project.creator.save({ session: session });
+    await tutorials.remove({ session: session });
+    tutorials.creator.tutorials.pull(tutorials);
+    await tutorials.creator.save({ session: session });
     await session.commitTransaction();
   } catch (err) {
+    console.log(err);
+  }
+  res.status(200).json({ message: 'tutorials deleted.' });
+};
+
+const deleteTutoAdmin = async (req, res, next) => {
+  const tutorialId = req.params.tid; //{pid: p1}
+  let tutorials;
+  try {
+    tutorials = await Tutorials.findById(tutorialId).populate('creator');
+  } catch (e) {
+    console.error(e);
+  }
+
+  if (!tutorials) {
+    const error = new HttpError('Could not find tutorials.', 404);
+    return next(error);
+  }
+  let existingUser;
+  try {
+    existingUser = await User.findById(req.userData.userId);
+  } catch (e) {
+    const error = new HttpError('Signing failed, please try again.', 401);
+    return next(error);
+  }
+  if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
+    console.log('adm');
+  } else {
     const error = new HttpError(
-      'Something went wrong, could not delete project.',
-      500
+      'You are not allowed to edit this tutorials.',
+      401
     );
     return next(error);
   }
 
-  fs.unlink(imagePath, (err) => {
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    await tutorials.remove({ session: session });
+    tutorials.creator.tutorials.pull(tutorials);
+    await tutorials.creator.save({ session: session });
+    await session.commitTransaction();
+  } catch (err) {
     console.log(err);
-  });
+  }
 
-  res.status(200).json({ message: 'Project deleted.' });
+  res.status(200).json({ message: 'tutorials deleted.' });
 };
 
 exports.getTutorialById = getTutorialById;
@@ -372,4 +415,5 @@ exports.getTutosbyInstrumentId = getTutosbyInstrumentId;
 exports.getTutorialsByUserId = getTutorialsByUserId;
 exports.createTutorials = createTutorials;
 exports.updateTutorial = updateTutorial;
-exports.deleteProject = deleteProject;
+exports.deleteTuto = deleteTuto;
+exports.deleteTutoAdmin = deleteTutoAdmin;

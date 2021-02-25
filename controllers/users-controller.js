@@ -382,28 +382,7 @@ const resetPassword = async (req, res, next) => {
     );
     return next(error);
   }
-  var transporter = nodemailer.createTransport({
-    service: 'gmail',
-    host: 'smtp.gmail.com',
-    port: process.env.EMAIL_PORT,
-    secure: true,
-    requireTLS: true,
-    auth: {
-      user: `${process.env.EMAIL_ADDRESS}`,
-      pass: `${process.env.EMAIL_PASSWORD}`,
-    },
-  });
-  var mailOptions = {
-    from: 'tweekTabs',
-    to: user.email,
-    subject: 'Mise à jour mot de passe TweekTabs !',
-    html: `<h1>Bonjour ${user.pseudo} </h1>
-		<p>Ton mot de passe a bien été mis à jour! ;)</p>
-		<br/>
-		<p>Bonne journée!</p>
-		<br/>
-		<p>l'équipe TweekTabs</p>`,
-  };
+
   let hashedPassword;
   try {
     hashedPassword = await bcrypt.hash(password, 12);
@@ -417,13 +396,8 @@ const resetPassword = async (req, res, next) => {
   user.password = hashedPassword;
   try {
     await user.save();
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
-    });
+    const url = `${req.protocol}://${req.get('host')}${req.hostname}/`;
+    await new Email(user, url).sendUpdatePassword();
   } catch (e) {
     console.log(e);
   }
