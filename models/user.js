@@ -14,6 +14,7 @@ const userSchema = new Schema({
     { type: mongoose.Types.ObjectId, required: false, ref: 'Tutorials' },
   ],
   news: [{ type: mongoose.Types.ObjectId, required: false, ref: 'News' }],
+  date_inscription: { type: Date, required: false },
 });
 userSchema.plugin(uniqueValidator);
 

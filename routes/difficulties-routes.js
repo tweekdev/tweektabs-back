@@ -6,7 +6,7 @@ const checkAuth = require('../middleware/check-auth');
 
 router.get('/', difficultiesController.getDifficulty);
 
-router.get('/:tid', difficultiesController.getDifficultyById);
+router.get('/:did', difficultiesController.getDifficultyById);
 router.use(checkAuth);
 
 router.post(
@@ -16,11 +16,8 @@ router.post(
 );
 
 router.patch(
-  '/:tid',
+  '/:did',
   [check('name').not().isEmpty()],
-  difficultiesController.updateRole
+  difficultiesController.updateDifficulty
 );
-
-router.delete('/:tid', difficultiesController.deleteRole);
-
 module.exports = router;

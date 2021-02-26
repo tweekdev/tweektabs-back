@@ -57,6 +57,10 @@ const getTutorials = async (req, res, next) => {
       .populate({
         path: 'instrument',
         select: 'name',
+      })
+      .populate({
+        path: 'creator',
+        select: 'pseudo',
       });
   } catch (e) {
     console.log(e);
@@ -126,7 +130,8 @@ const getLastTutorials = async (req, res, next) => {
         path: 'instrument',
         select: 'name',
       })
-      .limit(7);
+      .limit(7)
+      .sort({ date: -1 });
   } catch (e) {
     console.log(e);
   }

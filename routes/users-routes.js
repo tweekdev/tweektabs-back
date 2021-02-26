@@ -15,6 +15,7 @@ router.post(
 );
 
 router.get('/', usersController.getUsers);
+router.get('/last', usersController.getLastUsers);
 
 router.get('/user/:uid', usersController.getUsersById);
 router.post('/forgotPassword', usersController.forgotPassword);

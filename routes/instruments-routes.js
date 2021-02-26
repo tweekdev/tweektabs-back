@@ -7,7 +7,7 @@ const checkAuth = require('../middleware/check-auth');
 router.get('/', instrumentsController.getInstrument);
 router.get('/last', instrumentsController.getLastInstrument);
 router.get('/alltutos/:iid', instrumentsController.getTutosbyInstrumentId);
-router.get('/:tid', instrumentsController.getInstrumentById);
+router.get('/:iid', instrumentsController.getInstrumentById);
 router.use(checkAuth);
 
 router.post(
@@ -17,11 +17,9 @@ router.post(
 );
 
 router.patch(
-  '/:tid',
+  '/:iid',
   [check('name').not().isEmpty()],
-  instrumentsController.updateRole
+  instrumentsController.updateInstrument
 );
-
-router.delete('/:tid', instrumentsController.deleteRole);
 
 module.exports = router;

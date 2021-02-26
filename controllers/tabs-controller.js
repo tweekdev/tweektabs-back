@@ -89,7 +89,42 @@ const getTabs = async (req, res, next) => {
       .populate({
         path: 'instrument',
         select: 'name',
+      })
+      .populate({
+        path: 'creator',
+        select: 'pseudo',
       });
+  } catch (e) {
+    console.log(e);
+  }
+  if (!tabs || tabs.length === 0) {
+    return next(
+      new HttpError('Could not find tabs for the provided user id.', 404)
+    );
+  }
+  res.json({
+    tabs: tabs.map((tab) => tab.toObject({ getters: true })),
+  }); //{creactor: place} => { place: place}
+};
+
+const getLastTabs = async (req, res, next) => {
+  let tabs;
+  try {
+    tabs = await Tabs.find({})
+      .populate({
+        path: 'type',
+        select: 'name',
+      })
+      .populate({
+        path: 'difficulty',
+        select: 'name',
+      })
+      .populate({
+        path: 'instrument',
+        select: 'name',
+      })
+      .limit(7)
+      .sort({ date: -1 });
   } catch (e) {
     console.log(e);
   }
@@ -375,6 +410,7 @@ const deleteTabAdmin = async (req, res, next) => {
 
 exports.getTabsById = getTabsById;
 exports.getTabs = getTabs;
+exports.getLastTabs = getLastTabs;
 exports.getTabsByTypeId = getTabsByTypeId;
 exports.getTabsByUserId = getTabsByUserId;
 exports.getTabsbyInstrumentId = getTabsbyInstrumentId;

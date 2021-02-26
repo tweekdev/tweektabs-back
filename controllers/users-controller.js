@@ -7,6 +7,8 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 const publicIp = require('public-ip');
 const Email = require('./../utils/email');
+const moment = require('moment');
+const momentTz = require('moment-timezone');
 const getUsers = async (req, res, next) => {
   let users;
   try {
@@ -14,6 +16,25 @@ const getUsers = async (req, res, next) => {
       path: 'role',
       select: 'name',
     });
+  } catch (e) {
+    const error = new HttpError(
+      'Fetching users failed, please try again.',
+      500
+    );
+    return next(error);
+  }
+  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
+};
+const getLastUsers = async (req, res, next) => {
+  let users;
+  try {
+    users = await User.find({}, '-password')
+      .populate({
+        path: 'role',
+        select: 'name',
+      })
+      .limit(7)
+      .sort({ date_inscription: -1 });
   } catch (e) {
     const error = new HttpError(
       'Fetching users failed, please try again.',
@@ -107,6 +128,9 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
+  const timezone = 'Europe/Paris';
+  const dateInscription = new Date();
+
   const createdUser = new User({
     firstname,
     name,
@@ -118,6 +142,11 @@ const signup = async (req, res, next) => {
     tabs: tabs ? tabs : [],
     tutorials: tutorials ? tutorials : [],
     news: [],
+    date_inscription: momentTz.tz(
+      dateInscription,
+      'YYYY-MM-DD HH:mm',
+      timezone
+    ),
   });
 
   try {
@@ -406,6 +435,7 @@ const resetPassword = async (req, res, next) => {
 };
 
 exports.getUsers = getUsers;
+exports.getLastUsers = getLastUsers;
 exports.getUsersById = getUsersById;
 exports.signup = signup;
 exports.login = login;

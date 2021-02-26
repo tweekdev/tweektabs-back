@@ -14,9 +14,7 @@ router.post('/', [check('name').not().isEmpty()], typesController.createType);
 router.patch(
   '/:tid',
   [check('name').not().isEmpty()],
-  typesController.updateRole
+  typesController.updateType
 );
-
-router.delete('/:tid', typesController.deleteRole);
 
 module.exports = router;
