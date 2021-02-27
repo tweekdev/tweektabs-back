@@ -9,41 +9,45 @@ const publicIp = require('public-ip');
 const Email = require('./../utils/email');
 const moment = require('moment');
 const momentTz = require('moment-timezone');
-const getUsers = async (req, res, next) => {
-  let users;
-  try {
-    users = await User.find({}, '-password').populate({
-      path: 'role',
-      select: 'name',
-    });
-  } catch (e) {
-    const error = new HttpError(
-      'Fetching users failed, please try again.',
-      500
-    );
-    return next(error);
-  }
-  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
-};
-const getLastUsers = async (req, res, next) => {
-  let users;
-  try {
-    users = await User.find({}, '-password')
-      .populate({
-        path: 'role',
-        select: 'name',
-      })
-      .limit(7)
-      .sort({ date_inscription: -1 });
-  } catch (e) {
-    const error = new HttpError(
-      'Fetching users failed, please try again.',
-      500
-    );
-    return next(error);
-  }
-  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
-};
+
+
+// const getUsers = async (req, res, next) => {
+//   let users;
+//   try {
+//     users = await User.find({}, '-password').populate({
+//       path: 'role',
+//       select: 'name',
+//     });
+//   } catch (e) {
+//     const error = new HttpError(
+//       'Fetching users failed, please try again.',
+//       500
+//     );
+//     return next(error);
+//   }
+//   res.json({ users: users.map((user) => user.toObject({ getters: true })) });
+// };
+
+
+// const getLastUsers = async (req, res, next) => {
+//   let users;
+//   try {
+//     users = await User.find({}, '-password')
+//       .populate({
+//         path: 'role',
+//         select: 'name',
+//       })
+//       .limit(7)
+//       .sort({ date_inscription: -1 });
+//   } catch (e) {
+//     const error = new HttpError(
+//       'Fetching users failed, please try again.',
+//       500
+//     );
+//     return next(error);
+//   }
+//   res.json({ users: users.map((user) => user.toObject({ getters: true })) });
+// };
 
 const getUsersByTabs = async (req, res, next) => {
   const tabsId = req.params.tid; //{pid: p1}
