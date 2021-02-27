@@ -92,6 +92,7 @@ const getUsersById = async (req, res, next) => {
 };
 
 const signup = async (req, res, next) => {
+  console.log('sign here');
   const admin = '601724ea6f33a7db18a485c5';
   const {
     firstname,

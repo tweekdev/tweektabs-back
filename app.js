@@ -3,7 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const HttpError = require('./models/http-error');
 const cors = require('cors');
-
+const multer = require('multer');
 const mongoose = require('mongoose');
 const projectRoute = require('./routes/projects-routes');
 const difficultiesRoute = require('./routes/difficulties-routes');
@@ -19,17 +19,25 @@ const tabsTutosRoute = require('./routes/tutos-tabs-routes');
 const tutorialsRoute = require('./routes/tutorials-routes');
 require('dotenv').config();
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(cors());
-app.options('*', cors());
-
+//----------------------------------------------------------------
+//route files
 app.use(
   '/api/tweektabs/uploads/images',
-  express.static(path.join('uploads', 'images'))
+  express.static(__dirname + '/uploads/images')
 );
 app.use(express.static(path.join('public')));
+//----------------------------------------------------------------
 
+//----------------------------------------------------------------
+//parsers et cors
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(multer().array());
+app.use(cors());
+//----------------------------------------------------------------
+
+//----------------------------------------------------------------
+//routes
 app.use('/api/tweektabs/users', usersRoute); // => /api/users/...
 app.use('/api/tweektabs/difficulties', difficultiesRoute);
 app.use('/api/tweektabs/instruments', instrumentsRoute);
@@ -38,11 +46,11 @@ app.use('/api/tweektabs/roles', roleRoute);
 app.use('/api/tweektabs/tabs', tabsRoute);
 app.use('/api/tweektabs/tutorials', tutorialsRoute);
 app.use('/api/tweektabs/tabsTutos', tabsTutosRoute);
-/*app.use((req, res, next) => {
+//----------------------------------------------------------------
+app.use((req, res, next) => {
   const error = new HttpError('Could not find this route', 404);
   throw error;
 });
-*/
 app.use((req, res, next) => {
   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
