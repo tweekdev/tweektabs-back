@@ -363,7 +363,9 @@ const forgotPassword = async (req, res, next) => {
   );
 
   try {
-    const resetURL = `http://localhost:3000/resetPassword/${token}`;
+    const resetURL = `${req.protocol}://${req.get('host')}${
+      req.hostname
+    }/resetPassword/${token}`;
     await new Email(existingUser, resetURL).sendPasswordReset();
     res.status(200).json({
       status: 'success',

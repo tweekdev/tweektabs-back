@@ -19,18 +19,17 @@ const tabsTutosRoute = require('./routes/tutos-tabs-routes');
 const tutorialsRoute = require('./routes/tutorials-routes');
 require('dotenv').config();
 
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+app.options('*', cors());
 
-app.use(cors('*'));
 app.use(
   '/api/tweektabs/uploads/images',
   express.static(path.join('uploads', 'images'))
 );
 app.use(express.static(path.join('public')));
 
-app.use('/api/tweektabs/projects', projectRoute); // => /api/places/...
-//app.use('/api/tweektabs/courses', courseRoute); // => /api/places/...
 app.use('/api/tweektabs/users', usersRoute); // => /api/users/...
 app.use('/api/tweektabs/difficulties', difficultiesRoute);
 app.use('/api/tweektabs/instruments', instrumentsRoute);
@@ -47,6 +46,7 @@ app.use('/api/tweektabs/tabsTutos', tabsTutosRoute);
 app.use((req, res, next) => {
   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
+
 app.use((error, req, res, next) => {
   if (req.file) {
     fs.unlink(req.file.path, () => {
