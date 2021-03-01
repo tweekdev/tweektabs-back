@@ -12,7 +12,7 @@ const typeRoute = require('./routes/types-routes');
 const usersRoute = require('./routes/users-routes');
 const path = require('path');
 const app = express();
-
+const mainRouter = require('./main.router');
 const roleRoute = require('./routes/roles-routes');
 const tabsRoute = require('./routes/tabs-routes');
 const tabsTutosRoute = require('./routes/tutos-tabs-routes');
@@ -38,7 +38,9 @@ app.use(cors());
 
 //----------------------------------------------------------------
 //routes
-app.use('/api/tweektabs/users', usersRoute); // => /api/users/...
+mainRouter(app);
+//app.use('/api/tweektabs/users', usersRoute); // => /api/users/...
+//app.use('/api/tweektabs', mainRouter); // => /api/users/...
 app.use('/api/tweektabs/difficulties', difficultiesRoute);
 app.use('/api/tweektabs/instruments', instrumentsRoute);
 app.use('/api/tweektabs/types', typeRoute);
@@ -67,14 +69,15 @@ app.use((error, req, res, next) => {
   res.status(error.code || 500);
   res.json({ message: error.message || 'An unknown error occurred.' });
 });
-
+const port = 7000;
 mongoose
   .connect(
     `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.9wgqh.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
     { useCreateIndex: true, useUnifiedTopology: true, useNewUrlParser: true }
   )
   .then(() => {
-    app.listen(7000);
+    console.log('listening on port ' + port);
+    app.listen(port);
   })
   .catch((error) => {
     console.log(error);

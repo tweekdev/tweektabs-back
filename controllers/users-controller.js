@@ -1,11 +1,9 @@
 const HttpError = require('../models/http-error');
-const User = require('../models/user');
+const User = require('../user/user.model');
 const Role = require('../models/role');
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
-const publicIp = require('public-ip');
 const Email = require('./../utils/email');
 const moment = require('moment');
 const momentTz = require('moment-timezone');
@@ -183,23 +181,7 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-  var dateConnexion = new Date();
-  let date = ('0' + dateConnexion.getDate()).slice(-2);
 
-  // current month
-  let month = ('0' + (dateConnexion.getMonth() + 1)).slice(-2);
-
-  // current year
-  let year = dateConnexion.getFullYear();
-
-  // current hours
-  let hours = dateConnexion.getHours();
-
-  // current minutes
-  let minutes = dateConnexion.getMinutes();
-
-  // current seconds
-  let seconds = dateConnexion.getSeconds();
   let existingUser;
 
   try {
@@ -258,16 +240,6 @@ const login = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new HttpError(
-      'Invalid input passed, please check your data.',
-      422
-    );
-    return next(error);
-  }
-
-  const { firstname, name, pseudo, role, email } = req.body;
   const userId = req.params.uid; //{pid: p1}
 
   let user;
@@ -294,6 +266,7 @@ const updateUser = async (req, res, next) => {
 
   res.status(200).json({ user: (await user).toObject({ getters: true }) });
 };
+
 const updateUserPassword = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
