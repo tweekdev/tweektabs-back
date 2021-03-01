@@ -71,7 +71,7 @@ exports.getUserById = async (req, res) => {
 exports.signup = async (req, res) => {
   try {
     let user = await UserService.signup(req.body, req.file);
-    const url = 0;
+    const url = '0';
     await new Email(user, url).sendWelcome();
     res.status(201).json({
       userId: user.userId,
@@ -81,7 +81,7 @@ exports.signup = async (req, res) => {
       pseudo: user.pseudo,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
   }
 };
 

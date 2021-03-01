@@ -118,6 +118,8 @@ const getLastTutorials = async (req, res, next) => {
   let tutorials;
   try {
     tutorials = await Tutorials.find({})
+      .sort({ date: -1 })
+      .limit(7)
       .populate({
         path: 'type',
         select: 'name',
@@ -129,9 +131,7 @@ const getLastTutorials = async (req, res, next) => {
       .populate({
         path: 'instrument',
         select: 'name',
-      })
-      .limit(7)
-      .sort({ date: -1 });
+      });
   } catch (e) {
     console.log(e);
   }

@@ -19,6 +19,14 @@ const tabsTutosRoute = require('./routes/tutos-tabs-routes');
 const tutorialsRoute = require('./routes/tutorials-routes');
 require('dotenv').config();
 
+// 1) GLOBAL MIDDLEWARES
+// Implement CORS
+app.use(cors());
+// Access-Control-Allow-Origin *
+
+app.options('*', cors());
+// app.options('/api/v1/tours/:id', cors());
+
 //----------------------------------------------------------------
 //route files
 app.use(
@@ -29,11 +37,9 @@ app.use(express.static(path.join('public')));
 //----------------------------------------------------------------
 
 //----------------------------------------------------------------
-//parsers et cors
+//parsers
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(multer().array());
-app.use(cors());
 //----------------------------------------------------------------
 
 //----------------------------------------------------------------

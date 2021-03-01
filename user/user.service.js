@@ -70,6 +70,11 @@ exports.getUserById = async (id) => {
  */
 exports.signup = async (user, file) => {
   console.log('/signup');
+  console.log('user: ' + user.name);
+  console.log('user: ' + user.firstname);
+  console.log('user: ' + user.password);
+  console.log('file' + file.path);
+  console.log('file' + file);
   let existingUser;
   let hashedPassword;
   let token;
@@ -79,14 +84,9 @@ exports.signup = async (user, file) => {
     throw new Error('Cette utilisateur existe déja.');
   }
   if (existingUser) throw new Error('Cette utilisateur existe déja.');
-  try {
-    hashedPassword = await bcrypt.hash(user.password, 12);
-  } catch (e) {
-    throw new Error("Une erreur c'est produite.");
-  }
 
-  const timezone = 'Europe/Paris';
-  const dateInscription = new Date();
+  hashedPassword = await bcrypt.hash(user.password, 12);
+
   const createdUser = new UserModel({
     firstname: user.firstname,
     name: user.name,
@@ -98,11 +98,7 @@ exports.signup = async (user, file) => {
     tabs: [],
     tutorials: [],
     news: [],
-    date_inscription: momentTz.tz(
-      dateInscription,
-      'YYYY-MM-DD HH:mm',
-      timezone
-    ),
+    date_inscription: new Date(),
   });
 
   //jwt token
@@ -122,7 +118,7 @@ exports.signup = async (user, file) => {
       pseudo: createdUser.pseudo,
     });
   } catch (e) {
-    throw new Error("Une erreur c'est produite.");
+    throw new Error(e);
   }
 };
 
