@@ -1,22 +1,16 @@
-const fs = require('fs');
-const express = require('express');
+const express = require('express')
 const bodyParser = require('body-parser');
-const HttpError = require('./models/http-error');
 const cors = require('cors');
-const multer = require('multer');
 const mongoose = require('mongoose');
-const projectRoute = require('./routes/projects-routes');
 const difficultiesRoute = require('./routes/difficulties-routes');
 const instrumentsRoute = require('./routes/instruments-routes');
-const typeRoute = require('./routes/types-routes');
-const usersRoute = require('./routes/users-routes');
 const path = require('path');
 const app = express();
 const mainRouter = require('./main.router');
-const roleRoute = require('./routes/roles-routes');
 const tabsRoute = require('./routes/tabs-routes');
 const tabsTutosRoute = require('./routes/tutos-tabs-routes');
 const tutorialsRoute = require('./routes/tutorials-routes');
+const colors = require('./colors')
 require('dotenv').config();
 
 // 1) GLOBAL MIDDLEWARES
@@ -27,14 +21,6 @@ app.use(cors());
 app.options('*', cors());
 // app.options('/api/v1/tours/:id', cors());
 
-//----------------------------------------------------------------
-//route files
-app.use(
-  '/api/tweektabs/uploads/images',
-  express.static(__dirname + '/uploads/images')
-);
-app.use(express.static(path.join('public')));
-//----------------------------------------------------------------
 
 //----------------------------------------------------------------
 //parsers
@@ -49,20 +35,28 @@ mainRouter(app);
 //app.use('/api/tweektabs', mainRouter); // => /api/users/...
 app.use('/api/tweektabs/difficulties', difficultiesRoute);
 app.use('/api/tweektabs/instruments', instrumentsRoute);
-app.use('/api/tweektabs/types', typeRoute);
-app.use('/api/tweektabs/roles', roleRoute);
 app.use('/api/tweektabs/tabs', tabsRoute);
 app.use('/api/tweektabs/tutorials', tutorialsRoute);
 app.use('/api/tweektabs/tabsTutos', tabsTutosRoute);
 //----------------------------------------------------------------
-app.use((req, res, next) => {
-  const error = new HttpError('Could not find this route', 404);
-  throw error;
-});
+
+//----------------------------------------------------------------
+//route files
+app.use(
+    '/api/tweektabs/uploads/images',
+    express.static(__dirname + '/uploads/images')
+);
+app.use(express.static(path.join('public')));
+//----------------------------------------------------------------
+
 app.use((req, res, next) => {
   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 
+app.get('/', (req, res) => {
+  res.send('API is running....')
+})
+/*
 app.use((error, req, res, next) => {
   if (req.file) {
     fs.unlink(req.file.path, () => {
@@ -75,16 +69,17 @@ app.use((error, req, res, next) => {
   res.status(error.code || 500);
   res.json({ message: error.message || 'An unknown error occurred.' });
 });
-const port = 7000;
+*/
+const PORT = 7000;
 mongoose
   .connect(
     `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.9wgqh.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`,
     { useCreateIndex: true, useUnifiedTopology: true, useNewUrlParser: true }
   )
   .then(() => {
-    console.log('listening on port ' + port);
-    app.listen(port);
+    console.log(colors.fg.green,`listening on PORT ${PORT} `);
+    app.listen(PORT);
   })
   .catch((error) => {
-    console.log(error);
+    console.log(colors.fg.red, error);
   });

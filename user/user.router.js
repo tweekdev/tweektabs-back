@@ -2,7 +2,7 @@ const userController = require('./user.controller');
 const fileUpload = require('../middleware/file-upload');
 
 const express = require('express');
-
+const checkAuth = require('../middleware/check-auth');
 const router = express.Router();
 
 //GET
@@ -14,7 +14,9 @@ router.get('/user/:id', userController.getUserById);
 router.post('/signup', fileUpload.single('picture'), userController.signup);
 router.post('/login', userController.login);
 router.post('/user/forgot-password', userController.forgotPassword);
+router.patch('/user/reset-password', userController.resetPassword);
 
+router.use(checkAuth);
 //PATCH
 router.patch(
   '/user/update/:uid',
@@ -24,6 +26,5 @@ router.patch(
   userController.updateUser
 );
 router.patch('/user/update-password/:uid', userController.updateUserPassword);
-router.patch('/user/reset-password', userController.resetPassword);
 
 module.exports = router;

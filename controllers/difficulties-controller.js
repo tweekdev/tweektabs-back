@@ -1,5 +1,4 @@
-const HttpError = require('../models/http-error');
-const { validationResult } = require('express-validator');
+
 const Difficulty = require('../models/difficulty');
 const User = require('../user/user.model');
 const mongoose = require('mongoose');
@@ -11,18 +10,7 @@ const getDifficultyById = async (req, res, next) => {
   try {
     difficulty = await Difficulty.findById(difficultyId);
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not find a difficulty.',
-      500
-    );
-    return next(error);
-  }
-  if (!difficulty) {
-    const error = new HttpError(
-      'Could not find difficulty for the provided id.',
-      404
-    );
-    return next(error);
+   console.log(e)
   }
   res.json({ difficulty: difficulty.toObject({ getters: true }) }); //{id: place} => { place: place}
 };
@@ -32,14 +20,11 @@ const getDifficulty = async (req, res, next) => {
   try {
     difficulties = await Difficulty.find({});
   } catch (e) {
-    const error = new HttpError(
-      'Fetching difficulties failed, please try again.',
-      500
-    );
-    return next(error);
+
+    console.log(e)
   }
   if (!difficulties || difficulties.length === 0) {
-    return next(new HttpError('Could not find difficulties.', 404));
+    console.log('Could not find difficulties.', 404);
   }
   res.json({
     difficulties: difficulties.map((difficulty) =>
@@ -51,9 +36,8 @@ const getDifficulty = async (req, res, next) => {
 const createDifficulty = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return next(
-      new HttpError('Invalid input passed, please check your data.', 422)
-    );
+
+    console.log(error)
   }
 
   const { name } = req.body;

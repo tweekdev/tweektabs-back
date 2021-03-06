@@ -12,7 +12,11 @@ const userSchema = new Schema({
   pseudo: { type: String, required: true },
   picture: { type: String, required: true },
   password: { type: String, required: true, minLength: 6 },
-  role: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Role' }],
+  isAdmin: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   tabs: [{ type: mongoose.Types.ObjectId, required: false, ref: 'Tabs' }],
   tutorials: [
     { type: mongoose.Types.ObjectId, required: false, ref: 'Tutorials' },

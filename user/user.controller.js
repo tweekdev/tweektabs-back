@@ -69,6 +69,7 @@ exports.getUserById = async (req, res) => {
  * @returns {Promise<void>}
  */
 exports.signup = async (req, res) => {
+  console.log('/signup-path');
   try {
     let user = await UserService.signup(req.body, req.file);
     const url = '0';
@@ -77,7 +78,7 @@ exports.signup = async (req, res) => {
       userId: user.userId,
       email: user.email,
       token: user.token,
-      role: user.role,
+      isAdmin: user.isAdmin,
       pseudo: user.pseudo,
     });
   } catch (error) {
@@ -100,7 +101,7 @@ exports.login = async (req, res) => {
       userId: user.userId,
       email: user.email,
       token: user.token,
-      role: user.role,
+      isAdmin: user.isAdmin,
       pseudo: user.pseudo,
     });
   } catch (error) {

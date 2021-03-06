@@ -1,8 +1,6 @@
 const UserModel = require('./user.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const moment = require('moment');
-const momentTz = require('moment-timezone');
 /**
  * Request in database for find all user
  * without password
@@ -10,10 +8,7 @@ const momentTz = require('moment-timezone');
  */
 exports.getUsers = async () => {
   try {
-    return UserModel.find({}, '-password').populate({
-      path: 'role',
-      select: 'name',
-    });
+    return UserModel.find({}, '-password')
   } catch (error) {
     console.error(error);
   }
@@ -39,10 +34,6 @@ exports.getLastSevenUsers = async () => {
     return UserModel.find({}, '-password')
       .sort({ date_inscription: -1 })
       .limit(7)
-      .populate({
-        path: 'role',
-        select: 'name',
-      });
   } catch (e) {
     console.error(e);
   }
@@ -55,10 +46,7 @@ exports.getLastSevenUsers = async () => {
 exports.getUserById = async (id) => {
   console.log('/user-by-id');
   try {
-    return UserModel.find({ _id: id }, '-password').populate({
-      path: 'role',
-      select: 'name',
-    });
+    return UserModel.find({ _id: id }, '-password')
   } catch (e) {
     console.error(e);
   }
@@ -70,11 +58,6 @@ exports.getUserById = async (id) => {
  */
 exports.signup = async (user, file) => {
   console.log('/signup');
-  console.log('user: ' + user.name);
-  console.log('user: ' + user.firstname);
-  console.log('user: ' + user.password);
-  console.log('file' + file.path);
-  console.log('file' + file);
   let existingUser;
   let hashedPassword;
   let token;
@@ -93,7 +76,6 @@ exports.signup = async (user, file) => {
     pseudo: user.pseudo,
     email: user.email,
     password: hashedPassword,
-    role: user.role,
     picture: file ? file.path : user.picture,
     tabs: [],
     tutorials: [],
@@ -114,7 +96,7 @@ exports.signup = async (user, file) => {
       userId: createdUser.id,
       email: createdUser.email,
       token: token,
-      role: createdUser.role,
+      isAdmin: createdUser.isAdmin,
       pseudo: createdUser.pseudo,
     });
   } catch (e) {
@@ -159,7 +141,6 @@ exports.login = async (user) => {
       userId: existingUser.id,
       email: existingUser.email,
       token: token,
-      role: existingUser.role,
       pseudo: existingUser.pseudo,
     });
   } catch (e) {
@@ -181,7 +162,7 @@ exports.updateUser = async (id, userData, file) => {
   user.firstname = userData.firstname;
   user.name = userData.name;
   user.pseudo = userData.pseudo;
-  user.role = userData.role;
+  user.isAdmin = userData.isAdmin
   user.email = userData.email;
   user.picture = file ? file.path : user.picture;
   try {
@@ -195,7 +176,7 @@ exports.updateUser = async (id, userData, file) => {
  * update le user et retourne les données update
  * @returns {Promise<*>}
  */
-exports.updateUserPassword = async (id, userData, file) => {
+exports.updateUserPassword = async (id, userData) => {
   const { password } = userData;
   let user;
   let hashedPassword;
