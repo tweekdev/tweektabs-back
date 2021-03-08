@@ -16,13 +16,11 @@ router.use(checkAuth);
 router.patch(
   '/:tid',
   fileUpload.single('file'),
-  [check('name').not().isEmpty()],
   tabsController.updateTabs
 );
 router.post(
   '/',
   fileUpload.single('file'),
-  [check('name').not().isEmpty()],
   tabsController.createTabs
 );
 router.delete('/deletetabadmin/:tid', tabsController.deleteTabAdmin);

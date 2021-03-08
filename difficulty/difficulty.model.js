@@ -7,4 +7,5 @@ const difficultySchema = new Schema({
   creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
 });
 
-module.exports = mongoose.model('Difficulty', difficultySchema);
+const DifficultyModel = mongoose.model('Difficulty', difficultySchema);
+module.exports = DifficultyModel;

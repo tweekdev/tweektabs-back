@@ -1,9 +1,4 @@
 const TypeModel = require('./type.model');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const moment = require('moment');
-const momentTz = require('moment-timezone');
-
 /**
  * Request in database for find all type
  * @returns {Promise<[TypeModel]>}

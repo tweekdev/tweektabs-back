@@ -1,5 +1,3 @@
-const HttpError = require('../models/http-error');
-const { validationResult } = require('express-validator');
 const Instrument = require('../models/instrument');
 const Tabs = require('../models/tabs');
 const User = require('../user/user.model');
@@ -12,18 +10,10 @@ const getInstrumentById = async (req, res, next) => {
   try {
     instrument = await Instrument.findById(instrumentId);
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not find a instrument.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
   if (!instrument) {
-    const error = new HttpError(
-      'Could not find instrument for the provided id.',
-      404
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   res.json({ instrument: instrument.toObject({ getters: true }) }); //{id: place} => { place: place}
 };
@@ -33,14 +23,10 @@ const getInstrument = async (req, res, next) => {
   try {
     instruments = await Instrument.find({});
   } catch (e) {
-    const error = new HttpError(
-      'Fetching instruments failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
   if (!instruments || instruments.length === 0) {
-    return next(new HttpError('Could not find instruments.', 404));
+    console.log("erreur pas de datas")
   }
   res.json({
     instruments: instruments.map((instrument) =>
@@ -53,14 +39,10 @@ const getLastInstrument = async (req, res, next) => {
   try {
     instruments = await Instrument.find({}).limit(4);
   } catch (e) {
-    const error = new HttpError(
-      'Fetching instruments failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
   if (!instruments || instruments.length === 0) {
-    return next(new HttpError('Could not find instruments.', 404));
+    console.log("erreur pas de datas")
   }
   res.json({
     instruments: instruments.map((instrument) =>
@@ -76,16 +58,10 @@ const getInstrumentByTabsId = async (req, res, next) => {
   try {
     instruments = await Role.find({ tabs: tabsId });
   } catch (e) {
-    const error = new HttpError(
-      'Fetching instruments failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
   if (!instruments || instruments.length === 0) {
-    return next(
-      new HttpError('Could not find instruments for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     instruments: instruments.map((instrument) =>
@@ -119,16 +95,11 @@ const getTutosbyInstrumentId = async (req, res, next) => {
   }
   res.json({
     instruments: instruments.map((instrument) => instrument),
-  }); //{creactor: place} => { place: place}
+  });
 };
 
 const createInstrument = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return next(
-      new HttpError('Invalid input passed, please check your data.', 422)
-    );
-  }
+
 
   const { name } = req.body;
 
@@ -143,11 +114,7 @@ const createInstrument = async (req, res, next) => {
   try {
     user = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError(
-      'Creating instrument failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
 
   try {
@@ -160,14 +127,6 @@ const createInstrument = async (req, res, next) => {
 };
 
 const updateInstrument = async (req, res, next) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const error = new HttpError(
-      'Invalid input passed, please check your data.',
-      422
-    );
-    return next(error);
-  }
   const { name } = req.body;
   const instrumentId = req.params.iid; //{pid: p1}
 
@@ -175,11 +134,7 @@ const updateInstrument = async (req, res, next) => {
   try {
     instrument = await Instrument.findById(instrumentId);
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update instrument.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
   /*
   if (instrument.creator.toString() !== req.userData.userId) {
@@ -195,11 +150,7 @@ const updateInstrument = async (req, res, next) => {
   try {
     await instrument.save();
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update instrument.',
-      500
-    );
-    return next(error);
+    console.log(e)
   }
 
   res

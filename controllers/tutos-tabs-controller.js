@@ -1,5 +1,3 @@
-const HttpError = require('../models/http-error');
-const { validationResult } = require('express-validator');
 const Tabs = require('../models/tabs');
 const Instrument = require('../models/instrument');
 const mongoose = require('mongoose');

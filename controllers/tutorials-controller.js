@@ -1,4 +1,4 @@
-const HttpError = require('../models/http-error');
+
 const { validationResult } = require('express-validator');
 const Tutorials = require('../models/tutorials');
 const User = require('../user/user.model');
@@ -27,18 +27,10 @@ const getTutorialById = async (req, res, next) => {
         select: 'pseudo picture',
       });
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not find a tutorials.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   if (!tutorials) {
-    const error = new HttpError(
-      'Could not find tutorials for the provided id.',
-      404
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   res.json({ tutorials: tutorials.toObject({ getters: true }) }); //{id: place} => { place: place}
 };
@@ -66,9 +58,7 @@ const getTutorials = async (req, res, next) => {
     console.log(e);
   }
   if (!tutorials || tutorials.length === 0) {
-    return next(
-      new HttpError('Could not find tutorials for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tutorials: tutorials.map((tutorial) =>
@@ -97,16 +87,10 @@ const getTutosbyInstrumentId = async (req, res, next) => {
         select: 'name',
       });
   } catch (e) {
-    const error = new HttpError(
-      'Fetching tutorials failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   if (!tutorials || tutorials.length === 0) {
-    return next(
-      new HttpError('Could not find tutorials for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tutorials: tutorials.map((tutorials) =>
@@ -136,9 +120,7 @@ const getLastTutorials = async (req, res, next) => {
     console.log(e);
   }
   if (!tutorials || tutorials.length === 0) {
-    return next(
-      new HttpError('Could not find tutorials for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tutorials: tutorials.map((tutorial) =>
@@ -172,11 +154,7 @@ const getTutorialsByUserId = async (req, res, next) => {
     console.log(e);
   }
   if (!tutorials) {
-    const error = new HttpError(
-      'Could not find tutorials for the provided user id.',
-      404
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   res.json({
     tutorials: tutorials.map((tutorial) =>
@@ -191,16 +169,10 @@ const getProjectsByUserId = async (req, res, next) => {
   try {
     projects = await Project.find({ creator: userId });
   } catch (e) {
-    const error = new HttpError(
-      'Fetching projects failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   if (!projects || projects.length === 0) {
-    return next(
-      new HttpError('Could not find projects for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     projects: projects.map((project) => project.toObject({ getters: true })),
@@ -210,9 +182,7 @@ const getProjectsByUserId = async (req, res, next) => {
 const createTutorials = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return next(
-      new HttpError('Invalid input passed, please check your data.', 422)
-    );
+    console.log("erreur pas de datas")
   }
   const {
     name,
@@ -243,16 +213,11 @@ const createTutorials = async (req, res, next) => {
   try {
     user = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError(
-      'Creating project failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   if (!user) {
-    const error = new HttpError('Could not find user for provided id.', 404);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   try {
@@ -288,26 +253,20 @@ const updateTutorial = async (req, res, next) => {
   try {
     existingUser = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError('Signing failed, please try again.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   let tutorials;
   try {
     tutorials = await Tutorials.findById(tutoId);
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update tutorials.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
     console.log('adm');
   } else if (tabs.creator.toString() !== req.userData.userId) {
-    const error = new HttpError('You are not allowed to edit this tabs.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   tutorials.name = name;
@@ -322,11 +281,7 @@ const updateTutorial = async (req, res, next) => {
   try {
     await tutorials.save();
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update tutorials.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   res
@@ -344,16 +299,11 @@ const deleteTuto = async (req, res, next) => {
   }
 
   if (!tutorials) {
-    const error = new HttpError('Could not find tutorials.', 404);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   if (tutorials.creator.id !== req.userData.userId) {
-    const error = new HttpError(
-      'You are not allowed to delete this tutorials.',
-      401
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   try {
@@ -379,24 +329,18 @@ const deleteTutoAdmin = async (req, res, next) => {
   }
 
   if (!tutorials) {
-    const error = new HttpError('Could not find tutorials.', 404);
-    return next(error);
+    console.log("erreur pas de datas")
   }
   let existingUser;
   try {
     existingUser = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError('Signing failed, please try again.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
   if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
     console.log('adm');
   } else {
-    const error = new HttpError(
-      'You are not allowed to edit this tutorials.',
-      401
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   try {

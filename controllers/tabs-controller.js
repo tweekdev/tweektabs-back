@@ -1,4 +1,3 @@
-const HttpError = require('../models/http-error');
 const { validationResult } = require('express-validator');
 const Tabs = require('../models/tabs');
 const User = require('../user/user.model');
@@ -31,11 +30,7 @@ const getTabsById = async (req, res, next) => {
     console.log(e);
   }
   if (!tabs) {
-    const error = new HttpError(
-      'Could not find tabs for the provided id.',
-      404
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   res.json({ tabs: tabs.toObject({ getters: true }) }); //{id: place} => { place: place}
 };
@@ -64,11 +59,7 @@ const getTabsByUserId = async (req, res, next) => {
     console.log(e);
   }
   if (!tabs) {
-    const error = new HttpError(
-      'Could not find tabs for the provided user id.',
-      404
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   res.json({
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
@@ -98,9 +89,7 @@ const getTabs = async (req, res, next) => {
     console.log(e);
   }
   if (!tabs || tabs.length === 0) {
-    return next(
-      new HttpError('Could not find tabs for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
@@ -129,9 +118,7 @@ const getLastTabs = async (req, res, next) => {
     console.log(e);
   }
   if (!tabs || tabs.length === 0) {
-    return next(
-      new HttpError('Could not find tabs for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
@@ -157,13 +144,10 @@ const getTabsbyInstrumentId = async (req, res, next) => {
         select: 'name',
       });
   } catch (e) {
-    const error = new HttpError('Fetching tabs failed, please try again.', 500);
-    return next(error);
+    console.log("erreur pas de datas")
   }
   if (!tabs || tabs.length === 0) {
-    return next(
-      new HttpError('Could not find tabs for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
@@ -179,9 +163,7 @@ const getTabsByTypeId = async (req, res, next) => {
     console.log(e);
   }
   if (!tabs || tabs.length === 0) {
-    return next(
-      new HttpError('Could not find tabs for the provided user id.', 404)
-    );
+    console.log("erreur pas de datas")
   }
   res.json({
     tabs: tabs.map((tab) => tab.toObject({ getters: true })),
@@ -191,9 +173,7 @@ const getTabsByTypeId = async (req, res, next) => {
 const createTabs = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return next(
-      new HttpError('Invalid input passed, please check your data.', 422)
-    );
+    console.log("erreur pas de datas")
   }
   const {
     name,
@@ -223,16 +203,11 @@ const createTabs = async (req, res, next) => {
   try {
     user = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError(
-      'Creating project failed, please try again.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   if (!user) {
-    const error = new HttpError('Could not find user for provided id.', 404);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   try {
@@ -252,11 +227,7 @@ const createTabs = async (req, res, next) => {
 const updateTabs = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const error = new HttpError(
-      'Invalid input passed, please check your data.',
-      422
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
   const {
     name,
@@ -273,26 +244,20 @@ const updateTabs = async (req, res, next) => {
   try {
     existingUser = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError('Signing failed, please try again.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   let tabs;
   try {
     tabs = await Tabs.findById(tabsId);
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update tabs.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
     console.log('adm');
   } else if (tabs.creator.toString() !== req.userData.userId) {
-    const error = new HttpError('You are not allowed to edit this tabs.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   tabs.name = name;
@@ -307,11 +272,7 @@ const updateTabs = async (req, res, next) => {
   try {
     await tabs.save();
   } catch (e) {
-    const error = new HttpError(
-      'Something went wrong, could not update tabs.',
-      500
-    );
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   res.status(200).json({ tabs: (await tabs).toObject({ getters: true }) });
@@ -327,13 +288,11 @@ const deleteTab = async (req, res, next) => {
   }
 
   if (!tabs) {
-    const error = new HttpError('Could not find tabs.', 404);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   if (tabs.creator.toString() !== req.userData.userId) {
-    const error = new HttpError('You are not allowed to edit this tabs.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   const imagePath = tabs.file;
@@ -366,21 +325,18 @@ const deleteTabAdmin = async (req, res, next) => {
   }
 
   if (!tabs) {
-    const error = new HttpError('Could not find tabs.', 404);
-    return next(error);
+    console.log("erreur pas de datas")
   }
   let existingUser;
   try {
     existingUser = await User.findById(req.userData.userId);
   } catch (e) {
-    const error = new HttpError('Signing failed, please try again.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
   if (existingUser.role.toString() === '601724ea6f33a7db18a485c5') {
     console.log('adm');
   } else {
-    const error = new HttpError('You are not allowed to edit this tabs.', 401);
-    return next(error);
+    console.log("erreur pas de datas")
   }
 
   const imagePath = tabs.file;
