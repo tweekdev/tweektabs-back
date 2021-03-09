@@ -7,7 +7,7 @@ exports.getTypes = async () => {
     try {
         return TypeModel.find({});
     } catch (error) {
-        console.error(error);
+        throw new Error(error);
     }
 };
 
@@ -48,7 +48,7 @@ exports.createType = async (type, userData) => {
     try {
         return await createdType.save();
     } catch (error) {
-        throw new Error(e);
+        throw new Error(error);
     }
 };
 

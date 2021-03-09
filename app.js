@@ -49,9 +49,8 @@ app.use((req, res, next) => {
   res.sendFile(path.resolve(__dirname, 'public', 'index.html'));
 });
 
-app.get('/', (req, res) => {
-  res.send('API is running....')
-})
+
+
 /*
 app.use((error, req, res, next) => {
   if (req.file) {
@@ -66,6 +65,7 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || 'An unknown error occurred.' });
 });
 */
+
 const PORT = 7000;
 mongoose
   .connect(
@@ -73,6 +73,7 @@ mongoose
     { useCreateIndex: true, useUnifiedTopology: true, useNewUrlParser: true }
   )
   .then(() => {
+    console.log(colors.fg.green,`--------------------------`);
     console.log(colors.fg.green,`listening on PORT ${PORT} `);
     app.listen(PORT);
   })

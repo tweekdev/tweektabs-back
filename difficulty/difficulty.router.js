@@ -10,7 +10,7 @@ router.get('/difficulty/:did', difficultiesController.getDifficultyById);
 router.use(checkAuth);
 
 router.post(
-    '/',
+    '/add',
     difficultiesController.createDifficulty
 );
 

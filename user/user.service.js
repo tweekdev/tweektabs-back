@@ -87,18 +87,18 @@ exports.signup = async (user, file) => {
   try {
     await createdUser.save();
     token = jwt.sign(
-      { userId: createdUser.id, email: createdUser.email },
-      process.env.JWT_KEY,
-      { expiresIn: '1h' }
+        {userId: createdUser.id, email: createdUser.email},
+        process.env.JWT_KEY,
+        {expiresIn: '1h'}
     );
 
-    return (data = {
+    return data = {
       userId: createdUser.id,
       email: createdUser.email,
       token: token,
       isAdmin: createdUser.isAdmin,
       pseudo: createdUser.pseudo,
-    });
+    };
   } catch (e) {
     throw new Error(e);
   }

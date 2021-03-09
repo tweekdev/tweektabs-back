@@ -8,7 +8,7 @@ exports.getDifficulties = async () => {
     try {
         return DifficultyModel.find({});
     } catch (error) {
-        console.error(error);
+        throw new Error(error);
     }
 };
 
@@ -49,7 +49,7 @@ exports.createDifficulty = async (difficulty, userData) => {
     try {
         return await createdDifficulty.save();
     } catch (error) {
-        throw new Error(e);
+        throw new Error(error);
     }
 };
 
@@ -63,12 +63,12 @@ exports.updateDifficulty = async (difficultyData, id) => {
     try {
         difficulty = await DifficultyModel.findById(id);
     } catch (e) {
-        throw new Error("Une erreur c'est produite.");
+        throw new Error(e);
     }
     difficulty.name = difficultyData.name;
     try {
-        return await type.save();
+        return await difficulty.save();
     } catch (e) {
-        throw new Error("Une erreur c'est produite.");
+        throw new Error(e);
     }
 }
