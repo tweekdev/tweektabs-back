@@ -1,6 +1,7 @@
 const userRouter = require('./user/user.router');
 const typeRouter = require('./type/type.router');
 const difficultyRouter = require('./difficulty/difficulty.router');
+const instrumentRouter = require('./instrument/instrument.router');
 const express = require('express');
 const router = express.Router();
 module.exports = (app) => {
@@ -24,7 +25,7 @@ module.exports = (app) => {
   //route difficulties
   app.use('/api/tweektabs/difficulties', difficultyRouter);
   //route instruments
-  app.use('/api/tweektabs/instruments', difficultyRouter);
+  app.use('/api/tweektabs/instruments', instrumentRouter);
 
   //route 404
   app.get('*', function(req, res){

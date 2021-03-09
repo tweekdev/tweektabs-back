@@ -18,7 +18,7 @@ const getInstrumentById = async (req, res, next) => {
   res.json({ instrument: instrument.toObject({ getters: true }) }); //{id: place} => { place: place}
 };
 
-const getInstrument = async (req, res, next) => {
+const getInstrument = async (req, res) => {
   let instruments;
   try {
     instruments = await Instrument.find({});

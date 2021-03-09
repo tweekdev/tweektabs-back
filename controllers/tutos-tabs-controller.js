@@ -1,5 +1,5 @@
 const Tabs = require('../models/tabs');
-const Instrument = require('../models/instrument');
+const Instrument = require('../instrument/instrument.model');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const ObjectId = mongoose.Types.ObjectId;

@@ -2,7 +2,6 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const instrumentsRoute = require('./routes/instruments-routes');
 const path = require('path');
 const app = express();
 const mainRouter = require('./main.router');
@@ -30,7 +29,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //----------------------------------------------------------------
 //routes
 mainRouter(app);
-app.use('/api/tweektabs/instruments', instrumentsRoute);
 app.use('/api/tweektabs/tabs', tabsRoute);
 app.use('/api/tweektabs/tutorials', tutorialsRoute);
 app.use('/api/tweektabs/tabsTutos', tabsTutosRoute);
